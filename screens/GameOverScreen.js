@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Button, Image } from 'react-native';
+import { View, Text, StyleSheet, Button, Image, Dimensions, ScrollView, SafeAreaView } from 'react-native';
 
 import Card from '../components/Card';
 import Colors from '../constants/colors';
@@ -8,6 +8,7 @@ import MainButton from '../components/MainButton';
 
 const GameOverScreen = props => {
     return (
+        <ScrollView>
         <View style={styles.screens}>
             <Card style={styles.cardContainer}>
                 <Text style={DefaultStyle.title}>Juego Terminado</Text>
@@ -27,6 +28,7 @@ const GameOverScreen = props => {
                 </View>
             </Card>
         </View>
+        </ScrollView>
     );
 };
 
@@ -53,14 +55,14 @@ const styles = StyleSheet.create({
         marginVertical: 10,
     },
     image: {
-        width: '100%',
+        width:  '100%',
         height: '100%',
     },
     imageContainer: {
-        marginVertical: 5,
-        width: '80%',
-        height: '50%',
-        borderRadius: 400,
+        marginVertical: Dimensions.get('window').height /20,
+        width: Dimensions.get('window').width * 0.70,
+        height: Dimensions.get('window').width * 0.70,
+        borderRadius: Dimensions.get('window').width * 0.70 / 2,
         borderWidth: 3,
         borderColor: 'white',
         overflow: 'hidden',

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, Alert, ScrollView, FlatList } from 'react-native';
+import { View, Text, StyleSheet, Alert, ScrollView, FlatList, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import NumberContainer from '../components/NumberContainer';
@@ -21,7 +21,7 @@ const generateRandomBetween = (min, max, exclude) => {
 
 const renderListItem = (listLength, itemData) => (
     <View style={styles.listItem}>
-        <Text style={DefaultStyle.bodyText}>#{listLength -itemData.index}</Text>
+        <Text style={DefaultStyle.bodyText}>#{listLength - itemData.index}</Text>
         <Text style={DefaultStyle.bodyText}>{itemData.item}</Text>
     </View>
 );
@@ -30,6 +30,21 @@ const GameScreen = props => {
     const initialGuess = generateRandomBetween(1, 100, userChoice);
     const [currentGuess, setCurrentGuess] = useState(initialGuess);
     const [pastGuesses, setPastGuesses] = useState([initialGuess.toString()]);
+    const [availableDeviceWidth, setavailableDeviceWidth] = useState(Dimensions.get('window').width);
+    const [availableDeviceHeight, setavailableDeviceHeight] = useState(Dimensions.get('window').height);
+
+    useEffect(() => {
+        const updateLayout = () => {
+            setavailableDeviceWidth(Dimensions.get('window').width);
+            setavailableDeviceHeight(Dimensions.get('window').height);
+        };
+
+        Dimensions.addEventListener('change', updateLayout);
+
+        return () => {
+            Dimensions.removeEventListener('change', updateLayout);
+        };
+    });
 
     const currentLow = useRef(1);
     const currentHigh = useRef(100);
@@ -59,6 +74,25 @@ const GameScreen = props => {
         setPastGuesses(curPastGuesses => [nextNumber.toString(), ...curPastGuesses]);
     };
 
+    if (availableDeviceHeight < 500) {
+        return (
+            <View style={styles.screen}>
+                <Text style={DefaultStyle.title}>Numero Adivinado por el Oponente</Text>
+                <Card style={styles.buttonContainer}>
+                    <MainButton onPress={nextGuessHandler.bind(this, 'greater')}><Ionicons name="md-add" size={20} color="white" /></MainButton>
+                    <NumberContainer>{currentGuess}</NumberContainer>
+                    <MainButton onPress={nextGuessHandler.bind(this, 'lower')}><Ionicons name="md-remove" size={20} color="white" /></MainButton>
+                </Card>
+                <View style={styles.listContainer}>
+                    <FlatList keyExtractor={(item) => item} data={pastGuesses} renderItem={renderListItem.bind(this, pastGuesses.length)} contentContainerStyle={styles.list} />
+                    {/*<ScrollView contentContainerStyle={styles.list}>
+            {pastGuesses.map((guess, index) => renderListItem(guess, pastGuesses.length - index))}
+        </ScrollView>*/}
+                </View>
+            </View>
+        );
+    }
+
     return (
         <View style={styles.screen}>
             <Text style={DefaultStyle.title}>Numero Adivinado por el Oponente</Text>
@@ -68,8 +102,8 @@ const GameScreen = props => {
                 <MainButton onPress={nextGuessHandler.bind(this, 'lower')}><Ionicons name="md-remove" size={20} color="white" /></MainButton>
             </Card>
             <View style={styles.listContainer}>
-            <FlatList keyExtractor={(item) => item} data={pastGuesses} renderItem={renderListItem.bind(this, pastGuesses.length)}  contentContainerStyle={styles.list}/>
-            {/*<ScrollView contentContainerStyle={styles.list}>
+                <FlatList keyExtractor={(item) => item} data={pastGuesses} renderItem={renderListItem.bind(this, pastGuesses.length)} contentContainerStyle={styles.list} />
+                {/*<ScrollView contentContainerStyle={styles.list}>
                 {pastGuesses.map((guess, index) => renderListItem(guess, pastGuesses.length - index))}
             </ScrollView>*/}
             </View>
@@ -86,26 +120,27 @@ const styles = StyleSheet.create({
     buttonContainer: {
         flexDirection: 'row',
         justifyContent: 'space-around',
-        marginTop: 20,
+        marginTop: Dimensions.get('window').height > 600 ? 5 : 5,
         width: '100%',
         maxWidth: '100%',
+        alignItems: 'center',
     },
-    listItem:{
+    listItem: {
         borderColor: '#ccc',
         borderWidth: 1,
         padding: 15,
-        marginVertical: 10, 
+        marginVertical: 10,
         backgroundColor: Colors.accent,
-        flexDirection: 'row',   
+        flexDirection: 'row',
         justifyContent: 'space-around',
-        alignItems: 'center',     
+        alignItems: 'center',
         width: '100%',
     },
-    listContainer:{
+    listContainer: {
         flex: 1,
-        width: '100%',       
+        width: Dimensions.get('window').width > 500 ? '100%' : '60%',
     },
-    list:{
+    list: {
         flexGrow: 1,
         //alignItems: 'center',
         justifyContent: 'flex-end',
